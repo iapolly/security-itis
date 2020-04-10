@@ -10,10 +10,13 @@ public class Gost {
     private static int[] LR = new int[]{0xfedcba98, 0x76543210}; //из Vectors
 
     public static void main(String[] args) throws FileNotFoundException {
+//      значения были взяты здесь https://wasm.in/blogs/algoritm-shifrovanija-gost-28147-89-metod-prostoj-zameny.359/
         initBoxAndKeys();
         testTime();
 
         int[] LRoutput = decrypt(encrypt(LR));
+//        int[] LRoutput = gammDecript(gammEncript(LR));
+
         System.out.println("test (is not failed): " + testChipher(LR, LRoutput));
         System.out.println("output: " + Integer.toHexString(LRoutput[0]) + ' ' + Integer.toHexString(LRoutput[1]));
     }
@@ -23,6 +26,20 @@ public class Gost {
         return input[0] == output[0] && input[1] == output[1];
     }
 
+//    режим гаммирования с обратной связью
+    private static int[] gammEncript(int[] p) {
+        int[] encrOut =  encrypt(p);
+        encrOut[0] = encrOut[0] ^ p[0];
+        encrOut[1] = encrOut[1] ^ p[1];
+        return encrOut;
+    }
+
+    private static int[] gammDecript(int[] p) {
+        int[] decrOut =  decrypt(p);
+        decrOut[0] = decrOut[0] ^ p[0];
+        decrOut[1] = decrOut[1] ^ p[1];
+        return decrOut;
+    }
 
     private static void testTime() {
         long start = System.currentTimeMillis();
