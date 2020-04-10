@@ -1,6 +1,10 @@
+import com.sun.deploy.util.ArrayUtil;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Array;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 public class Gost {
 
@@ -19,6 +23,11 @@ public class Gost {
 
         System.out.println("test (is not failed): " + testChipher(LR, LRoutput));
         System.out.println("output: " + Integer.toHexString(LRoutput[0]) + ' ' + Integer.toHexString(LRoutput[1]));
+
+        System.out.println(Integer.toHexString(tabularSubstitution(0x66793940)));
+//        должно быть 11e10325
+        System.out.println(Integer.toHexString(F(0x05060708, 0x61733238)));
+//      должно быть 0819288F
     }
 
 
@@ -126,7 +135,10 @@ public class Gost {
 
 
     private static int F(int a, int k) {
-        a = a ^ k;
+        long aL = (a & 0xffffffffL);
+        long kL = (k & 0xffffffffL);
+
+        a = (int)(((aL + kL) & 0xffffffffL));
         a = tabularSubstitution(a);
         a = Integer.rotateLeft(a, 11);
         return a;
@@ -155,5 +167,15 @@ public class Gost {
         }
 
         return bytes;
+    }
+
+    private static byte[] concat(byte[] a, byte[] b) {
+        final int alen = a.length;
+        final int blen = b.length;
+        final byte[] result = (byte[]) java.lang.reflect.Array.
+                newInstance(a.getClass().getComponentType(), alen + blen);
+        System.arraycopy(a, 0, result, 0, alen);
+        System.arraycopy(b, 0, result, alen, blen);
+        return result;
     }
 }
