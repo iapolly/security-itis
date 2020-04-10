@@ -24,10 +24,10 @@ public class Gost {
         System.out.println("test (is not failed): " + testChipher(LR, LRoutput));
         System.out.println("output: " + Integer.toHexString(LRoutput[0]) + ' ' + Integer.toHexString(LRoutput[1]));
 
-        System.out.println(Integer.toHexString(tabularSubstitution(0x66793940)));
-//        должно быть 11e10325
-        System.out.println(Integer.toHexString(F(0x05060708, 0x61733238)));
-//      должно быть 0819288F
+        System.out.println(Integer.toHexString(tabularSubstitution(0xfdb97531)));
+//      должно быть 2a196f34 (A.2.1 Преобразование t)
+        System.out.println(Integer.toHexString(F(0x87654321, 0xfedcba98)));
+//      должно быть fdcbc20c (A.2.2 Преобразование g)
     }
 
 
@@ -73,19 +73,19 @@ public class Gost {
 
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 16; j++) {
-                byte b = sc.nextByte(16);
+                byte b = sc.nextByte();
                 box[i][j] = b;
             }
         }
 
-        key[0] = 0x61733238;
-        key[1] = 0x7a773337;
-        key[2] = 0x71383339;
-        key[3] = 0x37333432;
-        key[4] = 0x75693233;
-        key[5] = 0x38653274;
-        key[6] = 0x77716d32;
-        key[7] = 0x65777031;
+        key[0] = 0xffeeddcc;
+        key[1] = 0xbbaa9988;
+        key[2] = 0x77665544;
+        key[3] = 0x33221100;
+        key[4] = 0xf0f1f2f3;
+        key[5] = 0xf4f5f6f7;
+        key[6] = 0xf8f9fafb;
+        key[7] = 0xfcfdfeff;
     }
 
     private static int[] encrypt(int[] inputLR) {
