@@ -13,6 +13,7 @@ class GostTest {
     @Test
     void testChipher() {
         data = new ArrayList<>();
+//        (A 2.4) это номер главы из которой взяты значения
         data.add(new TestData(new int[]{0xfedcba98, 0x76543210}, new int[]{0x4ee901e5, 0xc2d8ca3d}));
 
         for (TestData d: data) {
