@@ -2,9 +2,7 @@ import com.sun.deploy.util.ArrayUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
 import java.util.Scanner;
-import java.util.stream.Stream;
 
 public class Gost {
 
@@ -14,43 +12,34 @@ public class Gost {
     private static int[] LR = new int[]{0xfedcba98, 0x76543210}; //из Vectors
 
     public static void main(String[] args) throws FileNotFoundException {
-//      значения были взяты здесь https://wasm.in/blogs/algoritm-shifrovanija-gost-28147-89-metod-prostoj-zameny.359/
-        initBoxAndKeys();
-        testTime();
+        Gost gost = new Gost();
+        gost.initBoxAndKeys();
+        gost.testTime();
 
-        int[] LRoutput = decrypt(encrypt(LR));
-//        int[] LRoutput = gammDecript(gammEncript(LR));
+        int[] LRoutput = gost.decrypt(gost.encrypt(LR));
 
-        System.out.println("test (is not failed): " + testChipher(LR, LRoutput));
+        System.out.println("test (is not failed): " + gost.testChipher(LR, LRoutput));
         System.out.println("output: " + Integer.toHexString(LRoutput[0]) + ' ' + Integer.toHexString(LRoutput[1]));
 
-        System.out.println(Integer.toHexString(tabularSubstitution(0xfdb97531)));
+        System.out.println(Integer.toHexString(gost.tabularSubstitution(0xfdb97531)));
 //      должно быть 2a196f34 (A.2.1 Преобразование t)
-        System.out.println(Integer.toHexString(F(0x87654321, 0xfedcba98)));
+        System.out.println(Integer.toHexString(gost.F(0x87654321, 0xfedcba98)));
 //      должно быть fdcbc20c (A.2.2 Преобразование g)
     }
 
+    Gost() {
+        try {
+            initBoxAndKeys();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
 
-    private static boolean testChipher(int[] input, int[] output) {
+    private boolean testChipher(int[] input, int[] output) {
         return input[0] == output[0] && input[1] == output[1];
     }
 
-//    режим гаммирования с обратной связью
-    private static int[] gammEncript(int[] p) {
-        int[] encrOut =  encrypt(p);
-        encrOut[0] = encrOut[0] ^ p[0];
-        encrOut[1] = encrOut[1] ^ p[1];
-        return encrOut;
-    }
-
-    private static int[] gammDecript(int[] p) {
-        int[] decrOut =  decrypt(p);
-        decrOut[0] = decrOut[0] ^ p[0];
-        decrOut[1] = decrOut[1] ^ p[1];
-        return decrOut;
-    }
-
-    private static void testTime() {
+    private void testTime() {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             encrypt(LR);
@@ -68,7 +57,7 @@ public class Gost {
         System.out.println("Decrypt time: " + ((double)(finish - start)) / 100);
     }
 
-    private static void initBoxAndKeys() throws FileNotFoundException {
+    void initBoxAndKeys() throws FileNotFoundException {
         Scanner sc = new Scanner(new File("box.txt"));
 
         for (int i = 0; i < 8; i++) {
@@ -88,7 +77,7 @@ public class Gost {
         key[7] = 0xfcfdfeff;
     }
 
-    private static int[] encrypt(int[] inputLR) {
+    int[] encrypt(int[] inputLR) {
         L = inputLR[0];
         R = inputLR[1];
 
@@ -110,7 +99,7 @@ public class Gost {
         return new int[]{L, R};
     }
 
-    private static int[] decrypt(int[] encriptResult) {
+    int[] decrypt(int[] encriptResult) {
         L = encriptResult[0];
         R = encriptResult[1];
 
@@ -133,8 +122,7 @@ public class Gost {
     }
 
 
-
-    private static int F(int a, int k) {
+    int F(int a, int k) {
         long aL = (a & 0xffffffffL);
         long kL = (k & 0xffffffffL);
 
@@ -144,7 +132,7 @@ public class Gost {
         return a;
     }
 
-    private static int tabularSubstitution(int blockV) {
+    int tabularSubstitution(int blockV) {
         byte[] substBytes = new byte[8];
         byte[] halfBytes = getHalfBytes(blockV);
         for (int i = 0; i < 8; i++) {
@@ -158,7 +146,7 @@ public class Gost {
         return result;
     }
 
-    private static byte[] getHalfBytes(int block) {
+    private byte[] getHalfBytes(int block) {
         byte[] bytes = new byte[8];
 
         for (int i = 0; i < 8; i++) {
@@ -167,15 +155,5 @@ public class Gost {
         }
 
         return bytes;
-    }
-
-    private static byte[] concat(byte[] a, byte[] b) {
-        final int alen = a.length;
-        final int blen = b.length;
-        final byte[] result = (byte[]) java.lang.reflect.Array.
-                newInstance(a.getClass().getComponentType(), alen + blen);
-        System.arraycopy(a, 0, result, 0, alen);
-        System.arraycopy(b, 0, result, alen, blen);
-        return result;
     }
 }
